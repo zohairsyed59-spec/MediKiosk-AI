@@ -1,0 +1,65 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+dist
+build
+*.local
+
+# Environment files (contains secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+
+# IDE / Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage
+.nyc_output
+
+# Build artifacts
+dist
+build
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Bolt/export artifacts
+project-bolt-*.zip
+*.zip
+
+# Supabase
+.supabase/temp
+.supabase/.branches
+
+# Vercel/Netlify
+.vercel
+.netlify
+
+# TypeScript cache
+*.tsbuildinfo
