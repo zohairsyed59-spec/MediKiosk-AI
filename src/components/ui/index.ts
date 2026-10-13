@@ -9,6 +9,7 @@ export { Separator } from './Separator';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 export { Avatar, AvatarImage, AvatarFallback } from './Avatar';
 export { Spinner, LoadingCard } from './Spinner';
+export { PageLoader } from './PageLoader';
 export { ToastProvider, useToast } from './Toast';
 export { EmptyState } from './EmptyState';
 export { Select } from './Select';

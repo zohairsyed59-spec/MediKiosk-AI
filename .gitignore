@@ -49,9 +49,7 @@ build
 *.temp
 .cache
 
-# Bolt/export artifacts
-project-bolt-*.zip
-*.zip
+
 
 # Supabase
 .supabase/temp

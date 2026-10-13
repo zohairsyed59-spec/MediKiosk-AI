@@ -1,41 +1,41 @@
-# MediKiosk AI — Clinical History-Taking Platform
+# MediKiosk AI
 
-An AI-powered clinical history-taking platform for Indian hospital OPDs. Patients record their complete medical history through natural voice conversation and guided touch interaction in their preferred language, scan and digitize their existing physical medical documents, and generate a structured, physician-ready clinical history summary — all before entering the consultation room.
+A clinical history-taking platform for Indian hospital OPDs. Patients record their medical history through multilingual voice and touch interaction, scan physical documents, and generate structured summaries for physicians before the consultation.
 
-## Main Features
+## Features
 
-### Patient Kiosk Flow (No login required)
-- **Patient identification** with ABHA ID, demographics, and language selection (8 Indian languages)
-- **Multilingual consent** screen in the patient's language, compliant with DPDP Act 2023 and ABDM consent framework
-- **Dual-mode history interview** — Allopathic (SOCRATES framework, 8 sections) or AYUSH (Dashavidha Pariksha, 6 sections)
-- **Voice + touch input** — every question answerable by speaking or tapping
-- **Adaptive questioning** with branching follow-ups and red-flag emergency detection
-- **Medical document upload** — prescriptions, lab reports, discharge summaries with OCR-ready digitization
-- **Structured summary generation** in standard clinical format, reviewed by patient before submission
+### Patient Kiosk Flow (no login required)
+- Patient identification with ABHA ID, demographics, and language selection (8 Indian languages)
+- Multilingual consent screen compliant with DPDP Act 2023 and ABDM consent framework
+- Dual-mode history interview: Allopathic (SOCRATES framework, 8 sections) or AYUSH (Dashavidha Pariksha, 6 sections)
+- Voice and touch input for every question
+- Adaptive questioning with branching follow-ups and red-flag emergency detection
+- Medical document upload (prescriptions, lab reports, discharge summaries)
+- Structured summary generation in standard clinical format, reviewed by patient before submission
 
-### Physician Portal (Email/password auth)
-- **Dashboard** with searchable, filterable list of patient summaries
-- **Summary review** with editable sections, physician notes, and raw response viewing
-- **Review workflow** — mark as reviewed or amended, with physician attribution
-- **Emergency flag visibility** — red-flagged cases highlighted prominently
+### Physician Portal (email/password authentication)
+- Dashboard with searchable, filterable list of patient summaries
+- Summary review with editable sections, physician notes, and raw response viewing
+- Review workflow: mark as reviewed or amended with physician attribution
+- Emergency flag visibility for red-flagged cases
 
 ### Design
-- Dark purple-gradient aesthetic (#0B0614, #170D2B, #7C3AED, #A78BFA)
-- Glassmorphism cards, soft shadows, rounded corners
-- Fully responsive (mobile, tablet, desktop)
-- Loading states, empty states, error messages, toast notifications
-- Smooth animations and micro-interactions
+- Light clinical theme with deep teal primary color
+- Fraunces display font, Plus Jakarta Sans for body text
+- Responsive layout for mobile, tablet, and desktop
+- Loading states, empty states, error handling, toast notifications
 
 ## Technology Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + TypeScript + Vite |
+|-------|------------|
+| Frontend | React 18, TypeScript, Vite |
 | Styling | Tailwind CSS 3 |
 | Icons | Lucide React |
 | Routing | React Router DOM 7 |
-| Backend/Database | Supabase (PostgreSQL + Auth + Storage) |
+| Backend/Database | Supabase (PostgreSQL, Auth, Storage) |
 | Voice Input | Web Speech API (browser-native) |
+| UI Components | Custom components with Radix UI Select |
 
 ## Project Structure
 
@@ -43,10 +43,11 @@ An AI-powered clinical history-taking platform for Indian hospital OPDs. Patient
 src/
 ├── App.tsx                    # Root component with routing
 ├── main.tsx                   # Entry point
-├── index.css                  # Global styles + design system
+├── index.css                  # Global styles and design system
 ├── lib/
 │   ├── supabase.ts            # Supabase client singleton
-│   └── summaryGenerator.ts    # AI summary generation logic
+│   ├── errors.ts              # Error handling utility
+│   └── summaryGenerator.ts    # Clinical summary generation logic
 ├── types/
 │   ├── index.ts               # Database entity types
 │   └── clinical.ts            # Clinical question definitions (Allopathic + AYUSH)
@@ -59,78 +60,124 @@ src/
 │   └── kiosk/                 # Kiosk-specific layout components
 └── pages/
     ├── LandingPage.tsx        # Marketing landing page
-    ├── kiosk/                 # Patient kiosk flow (8 pages)
+    ├── kiosk/                 # Patient kiosk flow (7 pages)
     └── physician/             # Physician portal (4 pages)
+
+supabase/
+├── migrations/
+│   ├── 20261013191252_create_medikiosk_schema.sql
+│   └── 20261014000000_security_hardening.sql
+├── functions/rate-limiter/    # Edge Function for rate limiting
+└── config.toml
 ```
 
 ## Database Schema
 
 | Table | Purpose |
 |-------|---------|
-| `patients` | Patient demographics (name, age, gender, ABHA ID, phone, language) |
-| `sessions` | Kiosk session tracking (status, mode, consent, red flags) |
+| `patients` | Demographics: name, age, gender, ABHA ID, phone, language |
+| `sessions` | Kiosk session tracking: status, mode, consent, red flags |
 | `history_responses` | Individual Q&A pairs from the adaptive interview |
 | `documents` | Uploaded medical document metadata with storage paths |
-| `summaries` | AI-generated structured clinical summaries with review status |
-| `physician_profiles` | Physician profiles linked to Supabase auth |
+| `summaries` | Structured clinical summaries with review status |
+| `physician_profiles` | Physician profiles linked to Supabase Auth |
 | `storage.buckets` | `medical-documents` bucket for file uploads |
 
 ### Row Level Security
-- Patient kiosk tables: `TO anon, authenticated` (kiosk runs without login)
-- Physician tables: `TO authenticated` with `auth.uid()` ownership checks
-- Storage: anon can upload, authenticated can read
+- Patient kiosk tables: anon INSERT + SELECT, authenticated SELECT + UPDATE
+- Physician tables: authenticated only with `auth.uid()` ownership checks
+- Storage: anon can upload, authenticated can read and delete
 
-## Installation
+## Prerequisites
+
+- Node.js 18+
+- npm or pnpm
+- Supabase account (free tier works for development)
+
+## Local Setup
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd medikiosk-ai
+
 # Install dependencies
 npm install
 
-# Set up environment variables (see below)
+# Set up environment variables
 cp .env.example .env
+# Edit .env with your Supabase credentials
 
 # Run development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Type checking
-npm run typecheck
-
-# Linting
-npm run lint
 ```
 
 ## Environment Variables
 
-The following environment variables are required. For local development, create a `.env` file:
+Create a `.env` file in the project root:
 
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-> **Note:** Never expose the Supabase service role key in frontend code. It is only for server-side/edge function use.
+| Variable | Description |
+|----------|-------------|
+| `VITE_SUPABASE_URL` | Supabase project REST endpoint |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous public key |
 
-## Database Setup
+> **Note:** Never expose the Supabase service role key in frontend code. It is only for server-side or edge function use.
 
-The database schema is applied via Supabase migrations. The migration file is at:
+## Database and Supabase Setup
+
+### 1. Create a Supabase Project
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Note the project URL and anon key from Settings → API
+
+### 2. Run Migrations
+In Supabase Dashboard → SQL Editor, run the migrations in order:
+
+```sql
+-- 1. Base schema
+\i supabase/migrations/20261013191252_create_medikiosk_schema.sql
+
+-- 2. Security hardening (restricts anon UPDATE/DELETE)
+\i supabase/migrations/20261014000000_security_hardening.sql
 ```
-supabase/migrations/20261013191252_create_medikiosk_schema.sql
+
+Or use the Supabase CLI:
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
 ```
 
-All tables, RLS policies, indexes, and storage buckets are created in a single migration. The schema is idempotent — safe to re-run.
+### 3. Configure Authentication
+In Supabase Dashboard → Authentication → Providers → Email:
+- Enable Email provider
+- Disable "Enable email confirmations" for demo purposes
 
-## How to Run
+### 3. Verify Storage Bucket
+The migration creates a `medical-documents` bucket. Verify in Storage that:
+- Bucket exists and is private
+- Anon can upload, authenticated can read
 
-1. Ensure environment variables are set (`.env` file)
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to start the development server
-4. Open the browser to the displayed URL
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview production build locally |
+| `npm run typecheck` | TypeScript type checking |
+| `npm run lint` | ESLint linting |
+
+## Local Development
+
+```bash
+npm run dev
+```
+
+Open the displayed URL (typically `http://localhost:5173`).
 
 ### User Flows
 
@@ -155,22 +202,24 @@ The application is a Vite SPA that can be deployed to any static hosting provide
 npm run build    # outputs to dist/
 ```
 
-Deploy the `dist/` folder to Vercel, Netlify, or any static host. Ensure the environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) are set in the deployment environment.
+Deploy the `dist/` folder to Vercel, Netlify, Cloudflare Pages, or any static host. Configure environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) in the deployment environment.
 
-## Known Limitations
+For SPA routing, configure your host to redirect all routes to `index.html`:
+- **Vercel/Netlify/Cloudflare Pages**: Automatic
+- **Apache/Nginx**: Add fallback rule to `index.html`
 
-- **Voice input** uses the browser's Web Speech API, which is best supported in Chrome/Edge. Firefox support is limited. The touch/tap interface works in all browsers.
-- **OCR/document digitization** stores uploaded documents and metadata. Full OCR text extraction would require integration with an OCR service (e.g., Google Vision, Tesseract) via a Supabase Edge Function.
-- **ABDM/FHIR integration** is architecturally designed but not connected to live ABDM APIs. The consent flow and ABHA ID capture are implemented; FHIR API push to HIS/EMR requires production ABDM credentials.
-- **ASR for Indian languages** uses the browser's built-in speech recognition. Production deployment would integrate Bhashini/AI4Bharat models via an edge function for accurate multilingual ASR.
-- **LLM-powered adaptive questioning** uses a predefined clinical question tree. A production version would integrate an LLM (e.g., via edge function) for dynamic follow-up question generation.
-- The bundle size is large due to lucide-react icon imports — production deployment should configure manual chunks for better loading performance.
+## Current Limitations
 
-## Security Notes
+- **Voice input** uses the browser's Web Speech API, best supported in Chrome/Edge. Firefox support is limited. The touch interface works in all browsers.
+- **Voice language** is hardcoded to English. Non-English patients must use the touch interface.
+- **OCR/document digitization** stores uploaded documents and metadata. Full OCR text extraction would require integration with an OCR service via a Supabase Edge Function.
+- **ABDM/FHIR integration** is architecturally designed but not connected to live ABDM APIs. ABHA ID capture and consent flow are implemented; FHIR API push requires production ABDM credentials.
+- **ASR for Indian languages** uses the browser's built-in speech recognition. Production deployment would integrate Bhashini/AI4Bharat models via an edge function.
+- **Adaptive questioning** uses a predefined clinical question tree. Dynamic LLM-powered follow-up generation is not implemented.
+- **Bundle size** is ~1.3 MB (gzipped ~300 KB). Production deployment should configure manual chunks for better loading performance.
+- No automated test suite. Manual testing is required for critical flows.
+- No CSP headers or security headers configured.
 
-- All patient data is protected by RLS policies at the database level
-- Physician authentication uses Supabase Auth (email/password)
-- No service role keys are exposed in frontend code
-- Session data is associated with patient sessions and can be cleared after consultation
-- File uploads go to a private Supabase storage bucket
-- Input validation on both client and database levels (CHECK constraints)
+## License
+
+MIT License - see LICENSE file if present, otherwise the project is provided as-is for educational and demonstration purposes.
